@@ -15,10 +15,6 @@ from utils import device
 def target_name(data_name):
     if data_name == "512_512":
         return ['water', 'grass', 'building']
-    elif data_name == "1300_1200":
-        return ['bare ground', 'forest', 'buildings', 'farmland', 'road']
-    elif data_name == "1400_1200":
-        return ['Urban', 'Water', 'Woodland', 'Cropland']
 
 def AA_andEachClassAccuracy(confusion_matrix):
     list_diag = np.diag(confusion_matrix)
@@ -83,27 +79,6 @@ def predict(model, test_loader, data_name, ratio=5, keep_probability=False):
         hdf5.savemat(f"./{data_name}/y_probabilityps={ratio}p.mat", {'probability': y_probability})
 
     return y_pred_test, y_test
-
-
-# def predict(model, test_loader):
-#     count = 0
-#     model.eval()
-#     y_pred_test = 0
-#     y_test = 0
-#     for inputs, labels, mask in test_loader:
-#         inputs = inputs.to(device)
-#         mask = mask.to(device)
-#         outputs, _, _ = model(inputs, mask)
-#         # _, _, outputs = model(inputs)
-#         outputs = np.argmax(outputs.detach().cpu().numpy(), axis=1)
-#         if count == 0:
-#             y_pred_test = outputs
-#             y_test = labels
-#             count = 1
-#         else:
-#             y_pred_test = np.concatenate((y_pred_test, outputs))
-#             y_test = np.concatenate((y_test, labels))
-#     return y_pred_test, y_test
 
     # 保存和输出
 
@@ -255,23 +230,23 @@ def caculate_similarity_and_distance(ori_vec, dif_vec):
     # similarity = cosine_distance(ori_vec, dif_vec).diag().mean()
     # return avg_distance + similarity
     # 计算同一batch内各向量的距离  距离大  上三角与下三角相同
-    # alpha = 0.8
-    # distance1 = 1 - torch.mm(ori_vec, ori_vec.T) / (torch.norm(ori_vec, dim=1).unsqueeze(1) * torch.norm(ori_vec, dim=1).unsqueeze(0))
-    # distance2 = 1 - torch.mm(dif_vec, dif_vec.T) / (
-    #             torch.norm(dif_vec, dim=1).unsqueeze(1) * torch.norm(dif_vec, dim=1).unsqueeze(0))
-    # # 创建掩码来排除对角线元素
-    # mask = ~torch.eye(distance1.size(0), dtype=torch.bool)
-    # distance = ((-0.25) * (distance1 + distance2))
-    # distance = distance[mask]  #torch.Size([992])
-    # distance = distance.mean()
+    alpha = 0.8
+    distance1 = 1 - torch.mm(ori_vec, ori_vec.T) / (torch.norm(ori_vec, dim=1).unsqueeze(1) * torch.norm(ori_vec, dim=1).unsqueeze(0))
+    distance2 = 1 - torch.mm(dif_vec, dif_vec.T) / (
+                torch.norm(dif_vec, dim=1).unsqueeze(1) * torch.norm(dif_vec, dim=1).unsqueeze(0))
+    # 创建掩码来排除对角线元素
+    mask = ~torch.eye(distance1.size(0), dtype=torch.bool)
+    distance = ((-0.25) * (distance1 + distance2))
+    distance = distance[mask]  #torch.Size([992])
+    distance = distance.mean()
     #计算两个输入对应样本之间的相似性  距离小
     # similarity = 1 - torch.mm(ori_vec, dif_vec.T) / (torch.norm(ori_vec, dim=1).unsqueeze(1) * torch.norm(dif_vec, dim=1).unsqueeze(0))
     # similarity = similarity.diag()
     # similarity = similarity.mean()#torch.Size([32])
     similarity = F.cosine_similarity(ori_vec, dif_vec)
     similarity = 1 - torch.mean(similarity)
-    # return (1 - alpha) * distance + alpha *similarity
-    return similarity
+    return (1 - alpha) * distance + alpha *similarity
+    # return similarity
 
     # cosine_similarity是一个方阵，其中cosine_similarity[i, j]是X[i]和X[j]的余弦相似度
 
@@ -379,7 +354,6 @@ def train(model, train_loader, test_loader, val_loader, criterion, optimizer, sc
     #计算精度
     res_accuracy = compution_accuracy(y_pred_test, y_test, data_name)
     with open(f'.\\{data_name}\\testdata.txt', 'a') as file:
-        # 将 all_accuracy 以字符串形式写入文件，并换行
         file.write(f"ps={patch_size}{res_accuracy}\n")
     end_test = time.time()
     test_time = end_test - strat_test
@@ -388,79 +362,3 @@ def train(model, train_loader, test_loader, val_loader, criterion, optimizer, sc
     print(f'测试时长：{test_time}')
     print("finished training")
     return True
-
-
-
-# def test(model, test_loader, criterion, optimizer, num_epochs=5):
-#     return
-
-def list_to_colormap(x_list):
-    y = np.zeros((x_list.shape[0], 3))
-    for index, item in enumerate(x_list):
-        if item == 0:
-            y[index] = np.array([255, 0, 0]) / 255.    #红色
-        if item == 1:
-            y[index] = np.array([0, 255, 0]) / 255.    #绿色
-        if item == 2:
-            y[index] = np.array([153, 51, 250]) / 255.  #湖紫色
-        if item == 3:
-            y[index] = np.array([255, 255, 0]) / 255.  #黄色
-        if item == 4:
-            y[index] = np.array([0, 255, 255]) / 255.  #青色
-        if item == 5:
-            y[index] = np.array([255, 0, 255]) / 255.   #深红色
-        if item == 6:
-            y[index] = np.array([127, 255, 212]) / 255.  #碧绿色
-        if item == 7:
-            y[index] = np.array([60,179,113]) / 255.  #青绿色
-        if item == 8:
-            y[index] = np.array([255, 239, 213]) / 255.
-        if item == 9:
-            y[index] = np.array([139, 139, 0]) / 255.
-        if item == 10:
-            y[index] = np.array([178, 48, 96]) / 255.
-        if item == 11:
-            y[index] = np.array([156, 102, 31]) / 255.
-        if item == 12:
-            y[index] = np.array([124, 252, 0]) / 255.
-        if item == 13:
-            y[index] = np.array([221, 160, 221]) / 255.
-        if item == 14:
-            y[index] = np.array([0, 100, 0]) / 255.
-        if item == 15:
-            y[index] = np.array([70, 130, 180]) / 255.
-        if item == 16:
-            y[index] = np.array([0, 0, 255]) / 255.
-        if item == 17:
-            y[index] = np.array([0, 0, 0]) / 255.#黑色为背景色
-        if item == 18:
-            y[index] = np.array([0, 255, 215]) / 255.
-        if item == -1:
-            y[index] = np.array([0, 0, 0]) / 255.  #黑色
-    return y
-
-def Draw_Classification_Map(label, name: str, scale: float = 4.0, dpi: int = 400):
-    '''
-    get classification map , then save to given path
-    :param label: classification label, 2D
-    :param name: saving path and file's name
-    :param scale: scale of image. If equals to 1, then saving-size is just the label-size
-    :param dpi: default is OK
-    :return: null
-    '''
-    x = np.ravel(label)
-    y_list = list_to_colormap(x)
-    y_re = np.reshape(y_list, (512, 512, 3))
-    fig, ax = plt.subplots()
-    # numlabel = np.array(label)
-    v = spy.imshow(classes=y_re.astype(np.int16), fignum=fig.number)
-    ax.set_axis_off()
-    ax.xaxis.set_visible(False)
-    ax.yaxis.set_visible(False)
-    fig.set_size_inches(label.shape[1] * scale / dpi, label.shape[0] * scale / dpi)
-    foo_fig = plt.gcf()  # 'get current figure'
-    plt.gca().xaxis.set_major_locator(plt.NullLocator())
-    plt.gca().yaxis.set_major_locator(plt.NullLocator())
-    plt.subplots_adjust(top=1, bottom=0, right=1, left=0, hspace=0, wspace=0)
-    foo_fig.savefig(name + '.png', format='png', transparent=True, dpi=dpi, pad_inches=0)
-    pass
