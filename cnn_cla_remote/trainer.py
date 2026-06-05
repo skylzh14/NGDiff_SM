@@ -229,24 +229,24 @@ def caculate_similarity_and_distance(ori_vec, dif_vec):
     # # 计算两个输入对应样本之间的相似性  距离小
     # similarity = cosine_distance(ori_vec, dif_vec).diag().mean()
     # return avg_distance + similarity
-    # 计算同一batch内各向量的距离  距离大  上三角与下三角相同
-    alpha = 0.8
-    distance1 = 1 - torch.mm(ori_vec, ori_vec.T) / (torch.norm(ori_vec, dim=1).unsqueeze(1) * torch.norm(ori_vec, dim=1).unsqueeze(0))
-    distance2 = 1 - torch.mm(dif_vec, dif_vec.T) / (
-                torch.norm(dif_vec, dim=1).unsqueeze(1) * torch.norm(dif_vec, dim=1).unsqueeze(0))
-    # 创建掩码来排除对角线元素
-    mask = ~torch.eye(distance1.size(0), dtype=torch.bool)
-    distance = ((-0.25) * (distance1 + distance2))
-    distance = distance[mask]  #torch.Size([992])
-    distance = distance.mean()
+    # # 计算同一batch内各向量的距离  距离大  上三角与下三角相同
+    # alpha = 0.8
+    # distance1 = 1 - torch.mm(ori_vec, ori_vec.T) / (torch.norm(ori_vec, dim=1).unsqueeze(1) * torch.norm(ori_vec, dim=1).unsqueeze(0))
+    # distance2 = 1 - torch.mm(dif_vec, dif_vec.T) / (
+    #             torch.norm(dif_vec, dim=1).unsqueeze(1) * torch.norm(dif_vec, dim=1).unsqueeze(0))
+    # # 创建掩码来排除对角线元素
+    # mask = ~torch.eye(distance1.size(0), dtype=torch.bool)
+    # distance = ((-0.25) * (distance1 + distance2))
+    # distance = distance[mask]  #torch.Size([992])
+    # distance = distance.mean()
     #计算两个输入对应样本之间的相似性  距离小
     # similarity = 1 - torch.mm(ori_vec, dif_vec.T) / (torch.norm(ori_vec, dim=1).unsqueeze(1) * torch.norm(dif_vec, dim=1).unsqueeze(0))
     # similarity = similarity.diag()
     # similarity = similarity.mean()#torch.Size([32])
     similarity = F.cosine_similarity(ori_vec, dif_vec)
     similarity = 1 - torch.mean(similarity)
-    return (1 - alpha) * distance + alpha *similarity
-    # return similarity
+    # return (1 - alpha) * distance + alpha *similarity
+    return similarity
 
     # cosine_similarity是一个方阵，其中cosine_similarity[i, j]是X[i]和X[j]的余弦相似度
 
