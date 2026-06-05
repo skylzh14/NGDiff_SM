@@ -82,26 +82,8 @@ def fun(y_pre, gt_hsi,path):
 
 '''
 ##生成全图
-y_re = hdf5.loadmat("C:\\Users\\极化SAR小组\\Desktop\\First_Work_Results\\CEGCN\\512_512\\label_pre.mat")['pre']
+y_re = hdf5.loadmat("\label_pre.mat")['pre']
 
 #y_re = y_re+1
-gt_hs = hdf5.loadmat("E:/pycharm_projects/postGraduate/ww/datasets_polsar/new_polsardata/512_512_XIAN/512_512_label.mat")['label']
+gt_hs = hdf5.loadmat("label.mat")['label']
 '''
-# ##生成无背景图
-# y_re = hdf5.loadmat("D:/Graduate/cegcn/对比实验/result/ICASSP_diff/512_512.mat")['y_re']
-
-
-#gt
-# y_re= hdf5.loadmat("D:/Graduate/cegcn/512_512/512_512_label.mat")['label']
-# y_re = y_re.ravel()#拉成一维
-
-#print('y_re.shape:', y_re.shape)
-#y_re=y_re+1
-# y_re = hdf5.loadmat("E:/PyCharm_projects/ww/datasets_polsar/new_polsardata/512_512_XIAN/512_512_label.mat")['label']
-# gt_hs = hdf5.loadmat("E:/PyCharm_projects/ww/datasets_polsar/new_polsardata/512_512_XIAN/512_512_label.mat")['label']
-# gt_hs = hdf5.loadmat("D:/Graduate/cegcn/512_512/512_512_label.mat")['label']
-# # gt_hs = hdf5.loadmat("D:/Graduate/cegcn/1400_1200/1400_1200_label.mat")['label']
-# path = 'D:/Graduate/cegcn/对比实验/result/ICASSP_diff/512_512'
-# y=fun(y_re, gt_hs, path)
-
-#overall_acc = metrics.accuracy_score(y_re, gt_test[:-VAL_SIZE])
